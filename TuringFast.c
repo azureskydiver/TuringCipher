@@ -1,4 +1,4 @@
-/* @(#)TuringFast.c	1.4 (QUALCOMM Turing) 02/11/28 */
+/* @(#)TuringFast.c	1.6 (QUALCOMM Turing) 03/02/24 */
 /*
  * Fast (unrolled) implementation of Turing
  *
@@ -6,49 +6,57 @@
  */
 
 /*
-This software is free for evaluation and testing use and
-applications subject to the following conditions.
+This software is free for commercial and non-commercial use subject to
+the following conditions:
 
-Copyright remains vested in QUALCOMM Incorporated, and Copyright
+1.  Copyright remains vested in QUALCOMM Incorporated, and Copyright
 notices in the code are not to be removed.  If this package is used in
-a product, QUALCOMM should be given attribution as the author.  This
-can be in the form of a textual message at program startup or in
-documentation (online or textual) provided with the package.
+a product, QUALCOMM should be given attribution as the author of the
+Turing encryption algorithm. This can be in the form of a textual
+message at program startup or in documentation (online or textual)
+provided with the package.
 
-Redistribution and use in source and binary forms, with or without
+2.  Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-1. Redistributions of source code must retain the copyright notice,
+a. Redistributions of source code must retain the copyright notice,
    this list of conditions and the following disclaimer.
 
-2. Redistributions in binary form must reproduce the above copyright
+b. Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the
    distribution.
 
-3. All advertising materials mentioning features or use of this
+c. All advertising materials mentioning features or use of this
    software must display the following acknowledgement:  This product
    includes software developed by QUALCOMM Incorporated.
 
-4. The software is not to be used for commercial or production purposes.
-
-THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
+3.  THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE AND AGAINST
+INFRINGEMENT ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-The license and distribution terms for any publically available version
+4.  The license and distribution terms for any publically available version
 or derivative of this code cannot be changed, that is, this code cannot
 simply be copied and put under another distribution license including
 the GNU Public License.
+
+5.  The Turing family of encryption algorithms are covered by patents in
+the United States of America and other countries. A free and
+irrevocable license is hereby granted for the use of such patents to
+the extent required to utilize the Turing family of encryption
+algorithms for any purpose, subject to the condition that any
+commercial product utilising any of the Turing family of encryption
+algorithms should show the words "Encryption by QUALCOMM" either on the
+product or in the associated documentation.
 */
 
 #include <stdlib.h>
@@ -227,16 +235,19 @@ TuringIV(const BYTE iv[], const int ivlength)
     A = S(A,0);	B = S(B,1); C = S(C,2);	D = S(D,3); E = S(E,0); \
     PHT(A,	B,	    C,		D,	    E); \
     STEP(z+1); \
-    A += R[OFF(z+2,16)]; \
-		B += R[OFF(z+2,13)]; \
-			    C += R[OFF(z+2,6)]; \
-					D += R[OFF(z+2,1)]; \
-						    E += R[OFF(z+2,0)]; \
+    STEP(z+2); \
+    STEP(z+3); \
+    A += R[OFF(z+4,14)]; \
+		B += R[OFF(z+4,12)]; \
+			    C += R[OFF(z+4,8)]; \
+					D += R[OFF(z+4,1)]; \
+						    E += R[OFF(z+4,0)]; \
     WORD2BYTE(A, b); \
 		WORD2BYTE(B, b+4); \
 			    WORD2BYTE(C, b+8); \
 					WORD2BYTE(D, b+12); \
 						    WORD2BYTE(E, b+16); \
+    STEP(z+4); \
 }
 
 /*
@@ -251,21 +262,21 @@ TuringGen(BYTE *buf)
     WORD	    A, B, C, D, E;
 
     ROUND(0,buf);
-    ROUND(2,buf+20);
-    ROUND(4,buf+40);
-    ROUND(6,buf+60);
-    ROUND(8,buf+80);
-    ROUND(10,buf+100);
-    ROUND(12,buf+120);
-    ROUND(14,buf+140);
-    ROUND(16,buf+160);
-    ROUND(1,buf+180);
-    ROUND(3,buf+200);
-    ROUND(5,buf+220);
-    ROUND(7,buf+240);
-    ROUND(9,buf+260);
-    ROUND(11,buf+280);
-    ROUND(13,buf+300);
-    ROUND(15,buf+320);
+    ROUND(5,buf+20);
+    ROUND(10,buf+40);
+    ROUND(15,buf+60);
+    ROUND(3,buf+80);
+    ROUND(8,buf+100);
+    ROUND(13,buf+120);
+    ROUND(1,buf+140);
+    ROUND(6,buf+160);
+    ROUND(11,buf+180);
+    ROUND(16,buf+200);
+    ROUND(4,buf+220);
+    ROUND(9,buf+240);
+    ROUND(14,buf+260);
+    ROUND(2,buf+280);
+    ROUND(7,buf+300);
+    ROUND(12,buf+320);
     return 17*20;
 }
